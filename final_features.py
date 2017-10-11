@@ -8,7 +8,7 @@ from nltk.stem import SnowballStemmer
 from string import punctuation
 from textblob import TextBlob
 
-train = pd.read_csv("train.csv")
+train = pd.read_csv("input/edited_train.csv")
 sample = train['question1'].size
 print(sample)
 
@@ -96,7 +96,7 @@ Wh_word_tags=['WDT', 'WP', 'WP$', 'WRB']
 tags=[noun_tags, verb_tags,adjective_tags ,adverb_tags ]
 make_dict(tags, train_question1, train_question2, train)
 
-print(dict)
+#print(dict)
 print(len(dict))
 '''
 for i in range(x, x+1000):
