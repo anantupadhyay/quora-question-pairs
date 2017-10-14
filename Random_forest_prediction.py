@@ -58,7 +58,7 @@ clean_text(test_question1, test.question1, 'test_question1', test)
 train_question2 = []
 test_question2 = []
 clean_text(train_question2, train.question2, 'train_question2', train)
-clean_text(test_question2, tets.question2, 'test_question2', test)
+clean_text(test_question2, test.question2, 'test_question2', test)
 
 
 '''
