@@ -245,7 +245,7 @@ y_train = train[['is_duplicate']]
 
 X_test = test[['similar_word', 'cos_sim', 'same_noun', 'same_verb', 'same_adjective', 'same_adverb', 'same_wh_word']]
 
-clf = RandomForestClassifier(n_estimators=30)
+clf = RandomForestClassifier(n_estimators=25)
 clf = clf.fit(X_train, y_train)
 Y_pred = clf.predict(X_test)
 
