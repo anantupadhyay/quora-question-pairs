@@ -1,3 +1,8 @@
+'''
+	Tested on 100 rows of test data, it was trained on data-set of 10000 rows and only 3 decesion trees were used
+	for estimation. 
+	Training and testing on whole dataset was taking a lot of time.
+'''
 import pandas as pd
 import numpy as np
 import re, math
@@ -9,11 +14,11 @@ from string import punctuation
 from textblob import TextBlob
 from sklearn.ensemble import RandomForestClassifier
 
-train = pd.read_csv("train.csv")
-test = pd.read_csv("test.csv")[:1000]
-sample = train['question1'].size
+train = pd.read_csv("train.csv")[:10000]
+test = pd.read_csv("test.csv")[:100]
+sample = 10000
 print(sample)
-test_size = 1000
+test_size = 100
 
 #print (train.isnull().sum())
 
@@ -114,7 +119,7 @@ print(len(dict))
 similar_word = []
 similar_word_test = []
 def word_match(question1, question2, flag):
-	# 	FLAG IS ZERO FOR TRAIN DATA AND '1' FOR TEST DATA
+	#------------FLAG IS ZERO FOR TRAIN DATA AND '1' FOR TEST DATA----------#
 	q1words = {}
 	q2words = {}
 	for word in str(question1).split():
@@ -139,7 +144,7 @@ WORD = re.compile(r'\w+')
 cos_sim = []
 cos_sim_test = []
 def cosine_sim(question1, question2, flag):
-	#	FLAG IS ZERO '0' FOR TRAIN DATA & ONE '1' FOR TEST DATA
+	#---------FLAG IS ZERO '0' FOR TRAIN DATA & ONE '1' FOR TEST DATA-----------#
 	word1 = WORD.findall(question1)
 	word2 = WORD.findall(question2)
 	for w in word1:
@@ -184,7 +189,7 @@ def same_pos(question1, question2, tag):
 				return 1
 	return 0
 
-#		TRAINING ON FULL TRAIN SET 		#
+#--------------TRAINING ON FULL TRAIN SET--------------#
 same_noun=[]
 same_verb=[]
 same_adjective=[]
@@ -212,7 +217,9 @@ train['same_adjective'] = same_adjective
 train['same_adverb'] = same_adverb
 train['same_wh_word'] = same_wh_word
 
-#			REPEATING THE PROCEDURE OF CREATING FEATURES FOR TESTING DATA 				#
+print ("Train data prepared")
+
+#---------------REPEATING THE PROCEDURE OF CREATING FEATURES FOR TESTING DATA--------------#
 same_noun_test=[]
 same_verb_test=[]
 same_adjective_test=[]
@@ -234,27 +241,27 @@ for x in range(test_size):
 
 test['similar_word'] = similar_word_test
 test['cos_sim'] = cos_sim_test
-test['same_noun'] = same_noun
-test['same_verb'] = same_verb
-test['same_adjective'] = same_adjective
-test['same_adverb'] = same_adverb
-test['same_wh_word'] = same_wh_word
+test['same_noun'] = same_noun_test
+test['same_verb'] = same_verb_test
+test['same_adjective'] = same_adjective_test
+test['same_adverb'] = same_adverb_test
+test['same_wh_word'] = same_wh_word_test
+
+print ("Test data also prepared\n")
 
 X_train = train[['similar_word', 'cos_sim', 'same_noun', 'same_verb', 'same_adjective', 'same_adverb', 'same_wh_word']]
 y_train = train[['is_duplicate']]
 
 X_test = test[['similar_word', 'cos_sim', 'same_noun', 'same_verb', 'same_adjective', 'same_adverb', 'same_wh_word']]
 
-clf = RandomForestClassifier(n_estimators=25)
+clf = RandomForestClassifier(n_estimators=3)
 clf = clf.fit(X_train, y_train)
+print ("Classifier is Trained")
 Y_pred = clf.predict(X_test)
 
-clf.score(X_train, Y_train)
-acc_random_forest = round(clf.score(X_train, Y_train) * 100, 2)
-print (acc_random_forest)
-
+print ("Starting to write the results...")
 submission = pd.DataFrame({
-        "test_id": test_df["id"],
+        "test_id": test["test_id"],
         "is_duplicate": Y_pred
     })
-submission.to_csv('submission.csv', index=False)
+submission.to_csv('submission2.csv', index=False)
