@@ -10,7 +10,7 @@ from textblob import TextBlob
 from sklearn.ensemble import RandomForestClassifier
 import random
 from sklearn.neural_network import MLPClassifier
-
+from sklearn.metrics import accuracy_score
 
 train = pd.read_csv("edited_train.csv")[:10000]
 ls=[]
@@ -65,6 +65,55 @@ train_question2 = []
 test_question2 = []
 clean_text(train_question2, train.question2, 'train_question2', train)
 
+similar_word = []
+def word_match(question1, question2, flag):
+	#------------FLAG IS ZERO FOR TRAIN DATA AND '1' FOR TEST DATA----------#
+	q1words = {}
+	q2words = {}
+	for word in str(question1).split():
+		q1words[word] = 1
+
+	for word in str(question2).split():
+		q2words[word] = 1
+
+	sharedwords_q1 = [w for w in q1words.keys() if w in q2words]
+	sharedwords_q2 = [w for w in q2words.keys() if w in q1words]
+	#print sharedwords_q1
+	#print sharedwords_q2
+
+	ln = (len(sharedwords_q1) + len(sharedwords_q2))/(len(q1words) + len(q2words)*1.0)
+	if(flag==0):
+		similar_word.append(ln)
+	elif(flag==1):
+		similar_word_test.append(ln)
+
+
+WORD = re.compile(r'\w+')
+cos_sim = []
+def cosine_sim(question1, question2, flag):
+	#---------FLAG IS ZERO '0' FOR TRAIN DATA & ONE '1' FOR TEST DATA-----------#
+	word1 = WORD.findall(question1)
+	word2 = WORD.findall(question2)
+	
+	vec1 = Counter(word1)
+	vec2 = Counter(word2)
+	intersec = set(vec1.keys()) & set(vec2.keys())
+	nume = sum([vec1[x] * vec2[x] for x in intersec])
+	sum1 = sum([vec1[x]**2 for x in vec1.keys()])
+	sum2 = sum([vec2[x]**2 for x in vec2.keys()])
+	deno = math.sqrt(sum1) * math.sqrt(sum2)
+	if not deno:
+		if(flag==0):
+			cos_sim.append(0.0)
+		elif(flag==1):
+			cos_sim_test.append(0.0)
+	else:
+		if(flag==0):
+			cos_sim.append(float(nume) / deno)
+		elif(flag==1):
+			cos_sim_test.append(float(nume) / deno)
+
+
 noun_tags=['NN','NNP','NNS','NNPS']
 verb_tags=['VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ']
 adjective_tags=['JJ','JJR','JJS']
@@ -91,9 +140,12 @@ same_adjective=[]
 same_adverb=[]
 same_wh_word=[]
 
+
 for x in range(sample):
 	t1 = train_question1[x]
 	t2 = train_question2[x]
+	word_match(t1, t2, 0)
+	cosine_sim(t1, t2, 0)
 	words1 = TextBlob(t1).tags
 	words2 = TextBlob(t2).tags
 	same_noun.append(same_pos(words1, words2, noun_tags))
@@ -108,22 +160,27 @@ train['same_adjective'] = same_adjective
 train['same_adverb'] = same_adverb
 train['same_wh_word'] = same_wh_word
 
+train['similar_word'] = similar_word
+train['cos_sim'] = cos_sim
+
 print ("Train data prepared")
 
 
 random.shuffle(ls)
 train_cc=train.loc[ls[:9500],:]
 test_cc=train.loc[ls[9500:],:]
-X_train = train_cc[['same_noun', 'same_verb', 'same_adjective', 'same_adverb', 'same_wh_word']]
+X_train = train_cc[['similar_word', 'cos_sim', 'same_noun', 'same_verb', 'same_adjective', 'same_adverb', 'same_wh_word']]
 y_train = train_cc[['is_duplicate']]
 
-X_test = test_cc[['same_noun', 'same_verb', 'same_adjective', 'same_adverb', 'same_wh_word']]
-
+X_test = test_cc[['similar_word', 'cos_sim', 'same_noun', 'same_verb', 'same_adjective', 'same_adverb', 'same_wh_word']]
+y_test = test_cc[['is_duplicate']]
 
 clf = MLPClassifier(solver = 'adam', alpha = 1e-5, hidden_layer_sizes = (100,))
 clf = clf.fit(X_train, y_train)
 print ("Classifier is Trained")
 Y_pred = clf.predict(X_test)
+
+print accuracy_score(y_test, Y_pred)
 
 print ("Starting to write the results...")
 print(i)
