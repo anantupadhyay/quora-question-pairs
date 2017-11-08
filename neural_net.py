@@ -1,3 +1,7 @@
+'''
+		Did something similar to Tf-idf, assigned weights to all terms and 
+		did some changes in word_match function.
+'''
 import pandas as pd
 import numpy as np
 import re, math
@@ -66,6 +70,22 @@ test_question2 = []
 clean_text(train_question2, train.question2, 'train_question2', train)
 
 similar_word = []
+
+train_qs = pd.Series(train_question1 + train_question2)
+
+##---------------Doing Something similar to Tf-idf Since we are using only train data
+def assign_weight(count, bs=5000):
+	if count < 2:
+		return 0
+	else:
+		return (1.0 / (count + bs))
+
+all_words = (" ".join(train_qs)).lower().split()
+count = Counter(all_words)
+weight = {word: assign_weight(count) for word, count in count.items()}
+
+#print weight
+
 def word_match(question1, question2, flag):
 	#------------FLAG IS ZERO FOR TRAIN DATA AND '1' FOR TEST DATA----------#
 	q1words = {}
@@ -76,12 +96,11 @@ def word_match(question1, question2, flag):
 	for word in str(question2).split():
 		q2words[word] = 1
 
-	sharedwords_q1 = [w for w in q1words.keys() if w in q2words]
-	sharedwords_q2 = [w for w in q2words.keys() if w in q1words]
-	#print sharedwords_q1
-	#print sharedwords_q2
+	shared_weights = [weight.get(w, 0) for w in q1words.keys() if w in q2words] + [weight.get(w, 0) for w in q2words.keys() if w in q1words]
+	total_weights = [weight.get(w, 0) for w in q1words] + [weight.get(w, 0) for w in q2words]
 
-	ln = (len(sharedwords_q1) + len(sharedwords_q2))/(len(q1words) + len(q2words)*1.0)
+	#print shared_weights, total_weights
+	ln = np.sum(shared_weights)*len(shared_weights) / np.sum(total_weights)
 	if(flag==0):
 		similar_word.append(ln)
 	elif(flag==1):
@@ -189,4 +208,4 @@ submission = pd.DataFrame({
 	"S.no.": ls[9500:]
 	})
 st='predicted_class_nn.csv'
-submission.to_csv(st, index=False)	
+submission.to_csv(st, index=False)
