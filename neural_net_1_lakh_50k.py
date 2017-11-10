@@ -1,6 +1,3 @@
-''' accuracy with 7 decision tress for 10k train data and 1k test data= 53.5%
-    for 1 lakh train data and 5k test data = 56.5%'''
-
 import pandas as pd
 import numpy as np
 import re, math
@@ -238,11 +235,11 @@ print ("Train data prepared")
 
 #---------------REPEATING THE PROCEDURE OF CREATING FEATURES FOR TESTING DATA--------------#
 
-same_noun=[]
-same_verb=[]
-same_adjective=[]
-same_adverb=[]
-same_wh_word=[]
+same_noun_test=[]
+same_verb_test=[]
+same_adjective_test=[]
+same_adverb_test=[]
+same_wh_word_test=[]
 for x in range(test_size):
 	t1 = test_question1[x]
 	t2 = test_question2[x]
@@ -250,22 +247,22 @@ for x in range(test_size):
 	#words2 = TextBlob(t2).tags
 	words1 = nltk.pos_tag(nltk.word_tokenize(t1))
 	words2 = nltk.pos_tag(nltk.word_tokenize(t2))
-	word_match(t1, t2, 0)
-	cosine_sim(t1, t2, 0)
-	same_noun.append(same_pos(words1, words2, noun_tags))
-	same_verb.append(same_pos(words1, words2, verb_tags))
-	same_adjective.append(same_pos(words1, words2, adjective_tags))
-	same_adverb.append(same_pos(words1, words2, adverb_tags))
-	same_wh_word.append(same_pos(words1, words2, Wh_word_tags))
+	word_match(t1, t2, 1)
+	cosine_sim(t1, t2, 1)
+	same_noun_test.append(same_pos(words1, words2, noun_tags))
+	same_verb_test.append(same_pos(words1, words2, verb_tags))
+	same_adjective_test.append(same_pos(words1, words2, adjective_tags))
+	same_adverb_test.append(same_pos(words1, words2, adverb_tags))
+	same_wh_word_test.append(same_pos(words1, words2, Wh_word_tags))
 
 
-test['similar_word'] = similar_word
-test['cos_sim'] = cos_sim
-test['same_noun'] = same_noun
-test['same_verb'] = same_verb
-test['same_adjective'] = same_adjective
-test['same_adverb'] = same_adverb
-test['same_wh_word'] = same_wh_word
+test['similar_word'] = similar_word_test
+test['cos_sim'] = cos_sim_test
+test['same_noun'] = same_noun_test
+test['same_verb'] = same_verb_test
+test['same_adjective'] = same_adjective_test
+test['same_adverb'] = same_adverb_test
+test['same_wh_word'] = same_wh_word_test
 
 print ("Test data prepared")
 
@@ -287,8 +284,6 @@ for x in range(test_size):
 	same_adjective_test.append(same_pos(words1, words2, adjective_tags))
 	same_adverb_test.append(same_pos(words1, words2, adverb_tags))
 	same_wh_word_test.append(same_pos(words1, words2, Wh_word_tags))
-
-
 test['similar_word'] = similar_word_test
 test['cos_sim'] = cos_sim_test
 test['same_noun'] = same_noun_test
@@ -296,7 +291,6 @@ test['same_verb'] = same_verb_test
 test['same_adjective'] = same_adjective_test
 test['same_adverb'] = same_adverb_test
 test['same_wh_word'] = same_wh_word_test
-
 print ("Test data also prepared\n")
 '''
 #random.shuffle(ls)
